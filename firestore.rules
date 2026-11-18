@@ -1,0 +1,149 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helpers ────────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+    function hasRole(role) {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    function isAdmin() { return hasRole('ADMIN'); }
+    function isVendor() { return hasRole('VENDOR'); }
+    function isCustomer() { return hasRole('CUSTOMER'); }
+
+    // ─── Users ───────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Vendors ─────────────────────────────────────────────────────────────
+    match /vendors/{vendorId} {
+      allow read: if true; // public storefront reads
+      allow create: if isSignedIn();
+      allow update: if isOwner(vendorId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Products ────────────────────────────────────────────────────────────
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isVendor() || isAdmin();
+      allow update: if isAdmin() ||
+        (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow delete: if isAdmin() ||
+        (isVendor() && resource.data.vendorId == request.auth.uid);
+    }
+
+    // ─── Categories ──────────────────────────────────────────────────────────
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Orders ──────────────────────────────────────────────────────────────
+    match /orders/{orderId} {
+      allow read: if isAdmin() ||
+        isOwner(resource.data.customerId) ||
+        (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isAdmin() ||
+        (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Payments ────────────────────────────────────────────────────────────
+    match /payments/{paymentId} {
+      allow read: if isAdmin() || isOwner(resource.data.customerId);
+      allow write: if isAdmin(); // only via server/webhook
+    }
+
+    // ─── Cart ────────────────────────────────────────────────────────────────
+    match /cart/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ─── Wishlist ────────────────────────────────────────────────────────────
+    match /wishlist/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // ─── Reviews ─────────────────────────────────────────────────────────────
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isAdmin() || isOwner(resource.data.customerId);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Coupons ─────────────────────────────────────────────────────────────
+    match /coupons/{couponId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() || isVendor();
+    }
+
+    // ─── Notifications ───────────────────────────────────────────────────────
+    match /notifications/{notifId} {
+      allow read: if isOwner(resource.data.userId) || isAdmin();
+      allow create: if isAdmin();
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isAdmin() || isOwner(resource.data.userId);
+    }
+
+    // ─── Returns ─────────────────────────────────────────────────────────────
+    match /returns/{returnId} {
+      allow read: if isAdmin() ||
+        isOwner(resource.data.customerId) ||
+        (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow create: if isSignedIn();
+      allow update: if isAdmin() ||
+        (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ─── Referrals ───────────────────────────────────────────────────────────
+    match /referrals/{referralId} {
+      allow read: if isAdmin() || isOwner(resource.data.referrerId);
+      allow create: if isSignedIn();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─── Analytics ───────────────────────────────────────────────────────────
+    match /analytics/{docId} {
+      allow read: if isAdmin() ||
+        (isVendor() && resource.data.vendorId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    // ─── Audit Logs ──────────────────────────────────────────────────────────
+    match /auditLogs/{logId} {
+      allow read: if isAdmin();
+      allow write: if false; // server-side only
+    }
+
+    // ─── Settings ────────────────────────────────────────────────────────────
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Inventory Reservations ──────────────────────────────────────────────
+    match /inventoryReservations/{resId} {
+      allow read: if isAdmin() || isOwner(resource.data.customerId);
+      allow write: if isAdmin();
+    }
+
+    // ─── OTP Attempts ────────────────────────────────────────────────────────
+    match /otpAttempts/{docId} {
+      allow read, write: if false; // server-side only
+    }
+  }
+}
