@@ -1,11 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.firebasestorage.app",
+      },
+    ],
+  },
   experimental: {
     agentFeedback: true,
   },
-  cacheComponents: true,
+  cacheComponents: false,
   partialPrefetching: false,
   turbopack: {
     rules: {

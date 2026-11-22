@@ -9,7 +9,11 @@
     "export": "next export"
   },
   "dependencies": {
+    "firebase": "^13.4.0",
+    "firebase-admin": "^14.5.1",
     "framer-motion": "^14.14.0",
+    "lucide-react": "^1.75.0",
+    "msg91-sdk": "^1.0.7",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"

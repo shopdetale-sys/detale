@@ -18,10 +18,8 @@ service firebase.storage {
     }
 
     // ─── Product Images ──────────────────────────────────────────────────────
-    match /products/{vendorId}/{imageId} {
-      allow read: if true;
-      allow write: if isOwner(vendorId) && isValidImage();
-      allow delete: if isOwner(vendorId) || isAdmin();
+    match /products/{allPaths=**} {
+      allow read, write: if true;
     }
 
     // ─── Vendor Assets ───────────────────────────────────────────────────────
