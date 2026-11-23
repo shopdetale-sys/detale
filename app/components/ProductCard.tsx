@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -26,14 +26,13 @@ export default function ProductCard({ product }: { product: Product }) {
     setTimeout(() => setAdded(false), 1500);
   };
 
-  // Calculate discount percentage if original price exists
   const discountPercent = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
     : 50;
 
   return (
-    <div className="group bg-[#161616] rounded-2xl overflow-hidden border border-neutral-800/80 hover:border-neutral-700 transition-all duration-300 flex flex-col shadow-lg">
-      {/* ── Product Image Area with Pedestal Studio Look ── */}
+    <div className="group bg-[#161616] rounded-lg sm:rounded-2xl overflow-hidden border border-neutral-800/80 hover:border-purple-600/50 transition-all duration-300 flex flex-col shadow-xl min-w-0">
+      {/* ── Product Image Area with Studio Pedestal & Glow ── */}
       <Link
         href={`/products/${product.slug}`}
         className="relative block aspect-square bg-[#1C1C1C] overflow-hidden"
@@ -49,8 +48,8 @@ export default function ProductCard({ product }: { product: Product }) {
             />
           ) : (
             <div className="relative flex flex-col items-center justify-center">
-              {/* Dark Pedestal Glow Effect */}
-              <div className="w-32 h-10 rounded-full bg-yellow-400/10 blur-xl absolute bottom-2" />
+              {/* Purple Pedestal Glow Effect */}
+              <div className="w-32 h-10 rounded-full bg-[#4D2C9C]/25 blur-xl absolute bottom-2" />
               <div className="text-6xl sm:text-7xl select-none filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)]">
                 🧴
               </div>
@@ -60,12 +59,12 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* ── Top-Right: Discount Badge ── */}
-        <span className="absolute top-3 right-3 bg-[#FFE500] text-black font-extrabold text-[10px] sm:text-xs px-2 py-0.5 rounded shadow-md uppercase tracking-wider">
+        <span className="hidden sm:block absolute top-3 right-3 bg-[#6D3EE6] text-white font-extrabold text-[10px] sm:text-xs px-2 py-0.5 rounded shadow-md uppercase tracking-wider">
           {discountPercent}% OFF
         </span>
 
         {/* ── Bottom-Left: "Sale" Badge ── */}
-        <span className="absolute bottom-3 left-3 bg-black/90 backdrop-blur-xs text-white text-[11px] font-semibold px-2.5 py-0.5 rounded border border-neutral-700 shadow-md">
+        <span className="hidden sm:block absolute bottom-3 left-3 bg-black/90 backdrop-blur-xs text-purple-200 text-[11px] font-semibold px-2.5 py-0.5 rounded border border-purple-800/60 shadow-md">
           Sale
         </span>
 
@@ -80,49 +79,47 @@ export default function ProductCard({ product }: { product: Product }) {
       </Link>
 
       {/* ── Card Info ── */}
-      <div className="p-4 sm:p-5 flex flex-col flex-1 bg-[#161616]">
+      <div className="relative min-h-[82px] sm:min-h-0 p-2.5 sm:p-5 flex flex-col flex-1 bg-[#161616]">
         {/* Product Title */}
-        <Link href={`/products/${product.slug}`} className="mb-2">
-          <h3 className="font-semibold text-white group-hover:text-[#FFE500] transition-colors leading-snug text-sm sm:text-base line-clamp-1">
+        <Link href={`/products/${product.slug}`} className="mb-1 sm:mb-2 pr-10 sm:pr-0">
+          <h3 className="font-semibold text-white group-hover:text-[#9D6EFF] transition-colors leading-snug text-[11px] sm:text-base line-clamp-1">
             {product.name}
           </h3>
         </Link>
 
         {/* Price Row */}
-        <div className="flex items-baseline gap-2.5 mt-auto mb-4 font-mono">
-          {product.originalPrice ? (
-            <span className="text-xs sm:text-sm text-neutral-500 line-through">
-              ₹ {product.originalPrice.toLocaleString("en-IN")}.00
-            </span>
-          ) : (
-            <span className="text-xs sm:text-sm text-neutral-500 line-through">
-              ₹ {(product.price * 2).toLocaleString("en-IN")}.00
-            </span>
-          )}
-          <span className="text-base sm:text-lg font-extrabold text-[#FFE500]">
+        <div className="flex flex-col sm:flex-row sm:items-baseline gap-0.5 sm:gap-2.5 mt-auto mb-0 sm:mb-4 font-mono pr-10 sm:pr-0">
+          <span className="hidden sm:inline text-xs sm:text-sm text-neutral-500 line-through">
+            ₹ {(product.originalPrice || product.price * 2).toLocaleString("en-IN")}.00
+          </span>
+          <span className="text-[13px] sm:text-lg font-extrabold text-white sm:text-[#9D6EFF]">
             ₹ {product.price.toLocaleString("en-IN")}.00
           </span>
         </div>
 
-        {/* ── Add to Cart Button (Solid Yellow, Black Bold Text) ── */}
+        {/* Compact mobile add button; full-width desktop button */}
         <button
           onClick={handleAddToCart}
           disabled={!product.inStock}
-          className={`w-full py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm font-extrabold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] ${
+          aria-label={added ? "Added to cart" : `Add ${product.name} to cart`}
+          className={`w-full sm:py-3 rounded-lg text-xs sm:text-sm font-extrabold uppercase tracking-wide transition-all duration-200 active:scale-[0.98] max-sm:absolute max-sm:right-2.5 max-sm:bottom-2.5 max-sm:w-9 max-sm:h-9 max-sm:rounded-full max-sm:flex max-sm:items-center max-sm:justify-center ${
             added
               ? "bg-green-500 text-black font-bold"
-              : "bg-[#FFE500] hover:bg-[#F5D800] disabled:bg-neutral-800 disabled:text-neutral-500 text-black shadow-md hover:shadow-yellow-400/20"
+              : "bg-[#4D2C9C] sm:hover:bg-[#6D3EE6] disabled:bg-neutral-800 disabled:text-neutral-500 text-white shadow-md sm:hover:shadow-purple-500/25 max-sm:bg-[#ff7a67]"
           }`}
         >
-          {added ? (
-            <span className="flex items-center justify-center gap-1.5">
-              <Check size={16} className="stroke-[3]" /> Added
-            </span>
-          ) : product.inStock ? (
-            "Add to Cart"
-          ) : (
-            "Out of Stock"
-          )}
+          <span className="sm:hidden">
+            {added ? <Check size={17} className="stroke-[3]" /> : <Plus size={20} className="stroke-[3]" />}
+          </span>
+          <span className="hidden sm:flex items-center justify-center gap-1.5">
+            {added ? (
+              <><Check size={16} className="stroke-[3]" /> Added</>
+            ) : product.inStock ? (
+              "Add to Cart"
+            ) : (
+              "Out of Stock"
+            )}
+          </span>
         </button>
       </div>
     </div>

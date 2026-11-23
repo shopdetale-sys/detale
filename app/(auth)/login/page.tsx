@@ -102,16 +102,16 @@ function LoginForm() {
   return (
     <div className="bg-[#141414] text-white rounded-3xl shadow-2xl p-8 w-full max-w-md border border-neutral-800">
       <div className="flex items-center justify-between mb-6">
-        <Link href="/" className="inline-flex items-center text-xs text-neutral-400 hover:text-[#FFE500]">
+        <Link href="/" className="inline-flex items-center text-xs text-neutral-400 hover:text-[#9D6EFF]">
           <ArrowLeft size={14} className="mr-1" /> Back to Store
         </Link>
-        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#FFE500] bg-yellow-500/10 px-2.5 py-1 rounded-full border border-yellow-500/20">
+        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#9D6EFF] bg-purple-950/40 px-2.5 py-1 rounded-full border border-purple-500/30">
           <ShieldCheck size={13} /> Secure OTP
         </span>
       </div>
 
       {/* Logo */}
-      <div className="flex justify-center mb-5 brightness-0 invert">
+      <div className="flex justify-center mb-5 drop-shadow-[0_0_12px_rgba(157,110,255,0.4)]">
         <Image
           src="/logo.png"
           alt="Detale"
@@ -146,7 +146,7 @@ function LoginForm() {
             <label className="block text-xs font-bold text-neutral-300 uppercase tracking-wider mb-1.5">
               Phone Number
             </label>
-            <div className="flex items-center border border-neutral-700 rounded-xl overflow-hidden focus-within:border-[#FFE500] transition bg-[#1C1C1C]">
+            <div className="flex items-center border border-neutral-700 rounded-xl overflow-hidden focus-within:border-[#6D3EE6] transition bg-[#1C1C1C]">
               <span className="px-3.5 py-3 text-neutral-400 text-xs font-bold border-r border-neutral-700 font-mono">
                 +91
               </span>
@@ -166,7 +166,7 @@ function LoginForm() {
           <button
             onClick={handleSendOtp}
             disabled={loading || phone.length !== 10}
-            className="w-full py-3.5 rounded-lg text-black text-xs font-extrabold transition bg-[#FFE500] hover:bg-[#F5D800] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-yellow-500/10 uppercase tracking-wider"
+            className="w-full py-3.5 rounded-lg text-white text-xs font-extrabold transition bg-[#4D2C9C] hover:bg-[#6D3EE6] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-900/40 uppercase tracking-wider active:scale-[0.98]"
           >
             {loading ? "Sending OTP..." : "Get OTP on SMS"}
           </button>
@@ -175,7 +175,7 @@ function LoginForm() {
             <button
               type="button"
               onClick={handleQuickDemoAdmin}
-              className="w-full text-xs text-[#FFE500] bg-neutral-900 hover:bg-neutral-800 py-2.5 rounded-lg font-bold transition flex items-center justify-center gap-1.5 border border-neutral-800"
+              className="w-full text-xs text-[#9D6EFF] bg-neutral-900 hover:bg-neutral-800 py-2.5 rounded-lg font-bold transition flex items-center justify-center gap-1.5 border border-purple-900/30"
             >
               <Sparkles size={13} /> Quick Test: Sign in as Admin
             </button>
@@ -198,7 +198,7 @@ function LoginForm() {
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
               onKeyDown={(e) => e.key === "Enter" && handleVerifyOtp()}
-              className="w-full bg-[#1C1C1C] border border-neutral-700 rounded-xl px-4 py-3.5 text-lg font-bold tracking-widest text-center outline-none focus:border-[#FFE500] transition text-white font-mono"
+              className="w-full bg-[#1C1C1C] border border-neutral-700 rounded-xl px-4 py-3.5 text-lg font-bold tracking-widest text-center outline-none focus:border-[#6D3EE6] transition text-white font-mono"
               autoFocus
             />
           </div>
@@ -206,7 +206,7 @@ function LoginForm() {
           <button
             onClick={handleVerifyOtp}
             disabled={loading || otp.length !== 6}
-            className="w-full py-3.5 rounded-lg text-black text-xs font-extrabold transition bg-[#FFE500] hover:bg-[#F5D800] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-yellow-500/10 uppercase tracking-wider"
+            className="w-full py-3.5 rounded-lg text-white text-xs font-extrabold transition bg-[#4D2C9C] hover:bg-[#6D3EE6] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-purple-900/40 uppercase tracking-wider active:scale-[0.98]"
           >
             {loading ? "Verifying..." : "Verify & Continue"}
           </button>
@@ -218,14 +218,14 @@ function LoginForm() {
                 setOtp("");
                 setError("");
               }}
-              className="hover:text-[#FFE500] underline"
+              className="hover:text-[#9D6EFF] underline"
             >
               Change number
             </button>
             <button
               onClick={handleSendOtp}
               disabled={resendCooldown > 0 || loading}
-              className="hover:text-[#FFE500] underline disabled:opacity-50"
+              className="hover:text-[#9D6EFF] underline disabled:opacity-50"
             >
               {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend OTP"}
             </button>

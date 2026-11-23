@@ -14,9 +14,9 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 bg-black">
-      {/* ── Top Trust Banner (Yellow) ── */}
-      <div className="bg-[#FFE500] text-black font-bold text-xs py-2 px-4 text-center flex items-center justify-center gap-1.5 shadow-sm">
-        <ShieldCheck size={14} className="text-black" />
+      {/* ── Top Trust Banner (Detale Purple #4D2C9C) ── */}
+      <div className="bg-[#4D2C9C] text-white font-bold text-xs py-2 px-4 text-center flex items-center justify-center gap-2 shadow-sm tracking-wide">
+        <ShieldCheck size={14} className="text-purple-200" />
         <span>Trusted by 20,00,000+ customers across India</span>
       </div>
 
@@ -26,7 +26,7 @@ export default function Navbar() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0 group">
-              <div className="brightness-0 invert transition-all duration-300 group-hover:drop-shadow-[0_0_8px_rgba(255,229,0,0.6)]">
+              <div className="transition-all duration-300 group-hover:scale-105 filter drop-shadow-[0_0_12px_rgba(109,62,230,0.5)]">
                 <Image
                   src="/logo.png"
                   alt="Detale"
@@ -41,27 +41,21 @@ export default function Navbar() {
             {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-8">
               <Link
-                href="/"
-                className="text-neutral-300 hover:text-[#FFE500] text-sm font-medium transition-colors"
-              >
-                Home
-              </Link>
-              <Link
                 href="/products"
-                className="text-neutral-300 hover:text-[#FFE500] text-sm font-medium transition-colors"
+                className="text-neutral-300 hover:text-[#9D6EFF] text-sm font-medium transition-colors"
               >
                 Products
               </Link>
               <Link
                 href="/orders"
-                className="text-neutral-300 hover:text-[#FFE500] text-sm font-medium transition-colors"
+                className="text-neutral-300 hover:text-[#9D6EFF] text-sm font-medium transition-colors"
               >
                 Track Orders
               </Link>
               {isAdmin && (
                 <Link
                   href="/admin"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#FFE500] text-black px-3 py-1.5 rounded-full hover:bg-yellow-400 transition"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#4D2C9C] text-white px-3.5 py-1.5 rounded-full hover:bg-[#6D3EE6] transition shadow-xs"
                 >
                   <LayoutDashboard size={13} />
                   Admin Panel
@@ -79,7 +73,7 @@ export default function Navbar() {
                       onClick={() => setUserDropdown(!userDropdown)}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-neutral-900 text-xs font-medium text-neutral-200 border border-neutral-800 transition"
                     >
-                      <div className="w-6 h-6 rounded-full bg-[#FFE500] text-black flex items-center justify-center font-bold text-xs">
+                      <div className="w-6 h-6 rounded-full bg-[#4D2C9C] text-white flex items-center justify-center font-bold text-xs">
                         {profile.phone.slice(-2)}
                       </div>
                       <span className="hidden sm:inline">
@@ -99,7 +93,7 @@ export default function Navbar() {
                           <Link
                             href="/admin"
                             onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-xs text-[#FFE500] font-semibold hover:bg-neutral-900"
+                            className="flex items-center gap-2 px-4 py-2 text-xs text-[#9D6EFF] font-semibold hover:bg-neutral-900"
                           >
                             <Shield size={14} /> Admin Dashboard
                           </Link>
@@ -126,7 +120,7 @@ export default function Navbar() {
                 ) : (
                   <Link
                     href="/login"
-                    className="flex items-center justify-center w-10 h-10 rounded-xl text-neutral-300 hover:text-[#FFE500] hover:bg-neutral-900 transition"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl text-neutral-300 hover:text-[#9D6EFF] hover:bg-neutral-900 transition"
                     title="Sign In"
                   >
                     <User size={20} />
@@ -138,11 +132,11 @@ export default function Navbar() {
               <button
                 onClick={openDrawer}
                 aria-label="Open Cart"
-                className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-neutral-900 text-neutral-200 hover:text-[#FFE500] transition"
+                className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-neutral-900 text-neutral-200 hover:text-[#9D6EFF] transition"
               >
                 <ShoppingBag size={21} />
                 {itemCount > 0 && (
-                  <span className="absolute top-1 right-1 bg-[#FFE500] text-black text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                  <span className="absolute top-1 right-1 bg-[#6D3EE6] text-white text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                     {itemCount}
                   </span>
                 )}
@@ -163,22 +157,15 @@ export default function Navbar() {
         {menuOpen && (
           <div className="md:hidden bg-[#0d0d0d] border-t border-neutral-900 px-5 py-5 flex flex-col gap-3">
             <Link
-              href="/"
-              className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#FFE500]"
-              onClick={() => setMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
               href="/products"
-              className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#FFE500]"
+              className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#9D6EFF]"
               onClick={() => setMenuOpen(false)}
             >
               Products
             </Link>
             <Link
               href="/orders"
-              className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#FFE500]"
+              className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#9D6EFF]"
               onClick={() => setMenuOpen(false)}
             >
               My Orders
@@ -186,7 +173,7 @@ export default function Navbar() {
             {isAdmin && (
               <Link
                 href="/admin"
-                className="text-[#FFE500] text-sm font-bold py-1.5"
+                className="text-[#9D6EFF] text-sm font-bold py-1.5"
                 onClick={() => setMenuOpen(false)}
               >
                 Admin Dashboard
@@ -195,7 +182,7 @@ export default function Navbar() {
             {!profile ? (
               <Link
                 href="/login"
-                className="text-[#FFE500] font-bold text-sm py-1.5"
+                className="text-[#9D6EFF] font-bold text-sm py-1.5"
                 onClick={() => setMenuOpen(false)}
               >
                 Sign In with OTP

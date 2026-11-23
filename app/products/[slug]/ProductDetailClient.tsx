@@ -47,7 +47,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   return (
     <div className="flex flex-col text-white">
       {/* Category */}
-      <p className="text-xs font-bold text-[#FFE500] uppercase tracking-wider mb-2">
+      <p className="text-xs font-bold text-[#9D6EFF] uppercase tracking-wider mb-2">
         {product.category}
       </p>
       <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">{product.name}</h1>
@@ -61,7 +61,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               size={15}
               className={
                 i < Math.floor(product.rating)
-                  ? "text-[#FFE500] fill-[#FFE500]"
+                  ? "text-[#9D6EFF] fill-[#9D6EFF]"
                   : "text-neutral-700 fill-neutral-700"
               }
             />
@@ -73,7 +73,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
       {/* Price Block */}
       <div className="flex items-baseline gap-3 mb-6 pb-6 border-b border-neutral-800">
-        <span className="text-3xl sm:text-4xl font-black text-[#FFE500] font-mono">
+        <span className="text-3xl sm:text-4xl font-black text-white font-mono">
           ₹ {product.price.toLocaleString("en-IN")}.00
         </span>
         {product.originalPrice ? (
@@ -81,7 +81,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <span className="text-base text-neutral-500 line-through font-mono">
               ₹ {product.originalPrice.toLocaleString("en-IN")}.00
             </span>
-            <span className="bg-[#FFE500] text-black text-xs font-black px-2 py-0.5 rounded uppercase">
+            <span className="bg-[#4D2C9C] text-white text-xs font-black px-2 py-0.5 rounded uppercase shadow-sm">
               {discountPercent}% OFF
             </span>
           </>
@@ -90,7 +90,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <span className="text-base text-neutral-500 line-through font-mono">
               ₹ {(product.price * 2).toLocaleString("en-IN")}.00
             </span>
-            <span className="bg-[#FFE500] text-black text-xs font-black px-2 py-0.5 rounded uppercase">
+            <span className="bg-[#4D2C9C] text-white text-xs font-black px-2 py-0.5 rounded uppercase shadow-sm">
               50% OFF
             </span>
           </>
@@ -101,8 +101,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       <div className="flex items-center gap-2 mb-6">
         {product.inStock ? (
           <>
-            <CheckCircle2 size={16} className="text-[#FFE500]" />
-            <span className="text-[#FFE500] text-xs font-bold">In Stock — Dispatched within 24 Hours</span>
+            <CheckCircle2 size={16} className="text-emerald-400" />
+            <span className="text-emerald-400 text-xs font-bold">In Stock — Dispatched within 24 Hours</span>
           </>
         ) : (
           <>
@@ -123,7 +123,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <ul className="space-y-2">
           {product.features.map((feature) => (
             <li key={feature} className="flex items-center gap-2 text-xs text-neutral-300">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#FFE500] flex-shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#6D3EE6] flex-shrink-0" />
               <span>{feature}</span>
             </li>
           ))}
@@ -157,8 +157,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           disabled={!product.inStock}
           className={`flex-1 flex items-center justify-center gap-2 text-xs sm:text-sm font-extrabold py-3.5 rounded-lg uppercase tracking-wider transition-all duration-200 active:scale-[0.98] ${
             added
-              ? "bg-green-500 text-black font-bold"
-              : "bg-[#FFE500] hover:bg-[#F5D800] disabled:bg-neutral-800 disabled:text-neutral-500 text-black shadow-lg shadow-yellow-500/10"
+              ? "bg-emerald-500 text-black font-bold"
+              : "bg-[#4D2C9C] hover:bg-[#6D3EE6] disabled:bg-neutral-800 disabled:text-neutral-500 text-white shadow-lg shadow-purple-900/40"
           }`}
         >
           {added ? (
@@ -175,7 +175,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <button
           onClick={() => setIsFavorite(!isFavorite)}
           className={`w-12 h-12 rounded-lg border flex items-center justify-center transition ${
-            isFavorite ? "border-red-400 bg-red-950/40 text-red-400" : "border-neutral-800 text-neutral-400 hover:bg-neutral-900"
+            isFavorite ? "border-purple-500 bg-purple-950/40 text-purple-400" : "border-neutral-800 text-neutral-400 hover:bg-neutral-900"
           }`}
         >
           <Heart size={18} fill={isFavorite ? "currentColor" : "none"} />
@@ -190,7 +190,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           { icon: RefreshCw, label: "COD & UPI", sub: "Cashfree Verified" },
         ].map(({ icon: Icon, label, sub }) => (
           <div key={label} className="bg-[#141414] rounded-xl p-3 text-center border border-neutral-800/80">
-            <Icon size={16} className="mx-auto text-[#FFE500] mb-1" />
+            <Icon size={16} className="mx-auto text-[#9D6EFF] mb-1" />
             <div className="text-[11px] font-bold text-white">{label}</div>
             <div className="text-[10px] text-neutral-400">{sub}</div>
           </div>

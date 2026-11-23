@@ -14,7 +14,7 @@ export default function CartPage() {
     return (
       <div className="bg-black min-h-[70vh] flex items-center justify-center py-20 px-4 text-center text-white">
         <div className="max-w-md w-full">
-          <div className="w-20 h-20 rounded-full bg-[#181818] border border-neutral-800 flex items-center justify-center text-[#FFE500] mx-auto mb-6">
+          <div className="w-20 h-20 rounded-full bg-[#181818] border border-neutral-800 flex items-center justify-center text-[#9D6EFF] mx-auto mb-6">
             <ShoppingBag size={36} />
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">Your Cart is Empty</h1>
@@ -23,7 +23,7 @@ export default function CartPage() {
           </p>
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 bg-[#FFE500] hover:bg-[#F5D800] text-black font-extrabold px-6 py-3 rounded-lg text-xs transition uppercase tracking-wider"
+            className="inline-flex items-center gap-2 bg-[#4D2C9C] hover:bg-[#6D3EE6] text-white font-extrabold px-6 py-3 rounded-lg text-xs transition uppercase tracking-wider shadow-lg shadow-purple-900/40"
           >
             Explore Catalog <ArrowRight size={15} />
           </Link>
@@ -37,11 +37,11 @@ export default function CartPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-neutral-900">
           <div>
-            <Link href="/products" className="inline-flex items-center text-xs text-neutral-400 hover:text-[#FFE500] mb-2 transition">
+            <Link href="/products" className="inline-flex items-center text-xs text-neutral-400 hover:text-[#9D6EFF] mb-2 transition">
               <ArrowLeft size={14} className="mr-1" /> Continue Shopping
             </Link>
             <h1 className="text-3xl font-extrabold text-white">
-              Shopping Cart <span className="text-[#FFE500] text-xl font-bold font-mono">({itemCount} items)</span>
+              Shopping Cart <span className="text-[#9D6EFF] text-xl font-bold font-mono">({itemCount} items)</span>
             </h1>
           </div>
           <button
@@ -57,14 +57,14 @@ export default function CartPage() {
           <div className="lg:col-span-2 space-y-4">
             {remainingForFree > 0 ? (
               <div className="bg-[#141414] border border-neutral-800 rounded-2xl p-4 flex items-center gap-3 text-xs text-neutral-300">
-                <Truck size={18} className="text-[#FFE500] flex-shrink-0" />
+                <Truck size={18} className="text-[#9D6EFF] flex-shrink-0" />
                 <span>
-                  Add <strong className="text-[#FFE500]">₹{remainingForFree}</strong> more to unlock <strong>FREE Delivery</strong> across India!
+                  Add <strong className="text-[#9D6EFF]">₹{remainingForFree}</strong> more to unlock <strong>FREE Delivery</strong> across India!
                 </span>
               </div>
             ) : (
-              <div className="bg-[#141414] border border-yellow-500/30 rounded-2xl p-4 flex items-center gap-3 text-xs text-[#FFE500] font-semibold">
-                <ShieldCheck size={18} className="text-[#FFE500] flex-shrink-0" />
+              <div className="bg-[#141414] border border-purple-500/30 rounded-2xl p-4 flex items-center gap-3 text-xs text-[#9D6EFF] font-semibold">
+                <ShieldCheck size={18} className="text-[#9D6EFF] flex-shrink-0" />
                 <span>Congratulations! Your order qualifies for <strong>FREE Delivery</strong>!</span>
               </div>
             )}
@@ -81,11 +81,11 @@ export default function CartPage() {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <span className="text-[10px] font-bold text-[#FFE500] uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-[#9D6EFF] uppercase tracking-wider">
                       {item.category || "Car Care"}
                     </span>
                     <Link href={`/products/${item.slug}`}>
-                      <h3 className="font-semibold text-white hover:text-[#FFE500] text-sm sm:text-base leading-snug transition-colors">
+                      <h3 className="font-semibold text-white hover:text-[#9D6EFF] text-sm sm:text-base leading-snug transition-colors">
                         {item.name}
                       </h3>
                     </Link>
@@ -114,7 +114,7 @@ export default function CartPage() {
 
                     {/* Total item price */}
                     <div className="text-right min-w-[70px]">
-                      <p className="text-base font-extrabold text-[#FFE500] font-mono">
+                      <p className="text-base font-extrabold text-white font-mono">
                         ₹{item.price * item.quantity}
                       </p>
                     </div>
@@ -145,7 +145,7 @@ export default function CartPage() {
                   <span>Standard Shipping</span>
                   <span className="font-semibold font-mono">
                     {shipping === 0 ? (
-                      <span className="text-[#FFE500] font-bold">FREE</span>
+                      <span className="text-emerald-400 font-bold">FREE</span>
                     ) : (
                       `₹${shipping}`
                     )}
@@ -153,20 +153,20 @@ export default function CartPage() {
                 </div>
                 <div className="border-t border-neutral-800 pt-3 flex justify-between text-sm font-bold text-white">
                   <span>Estimated Total</span>
-                  <span className="text-[#FFE500] text-xl font-mono">₹{total}</span>
+                  <span className="text-white text-xl font-mono">₹{total}</span>
                 </div>
               </div>
 
               <Link
                 href="/checkout"
-                className="w-full bg-[#FFE500] hover:bg-[#F5D800] text-black font-extrabold py-3.5 rounded-lg text-center transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-lg shadow-yellow-500/10 active:scale-[0.98]"
+                className="w-full bg-[#4D2C9C] hover:bg-[#6D3EE6] text-white font-extrabold py-3.5 rounded-lg text-center transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-lg shadow-purple-900/40 active:scale-[0.98]"
               >
                 Proceed to Checkout <ArrowRight size={16} />
               </Link>
 
               <div className="bg-[#181818] border border-neutral-800 rounded-xl p-4 text-[11px] text-neutral-400 space-y-2">
                 <div className="flex items-center gap-2 text-white font-semibold">
-                  <ShieldCheck size={16} className="text-[#FFE500]" />
+                  <ShieldCheck size={16} className="text-[#9D6EFF]" />
                   <span>Secure Payments by Cashfree</span>
                 </div>
                 <p>Supports UPI (GPay, PhonePe, Paytm), Credit & Debit Cards, NetBanking, and Cash on Delivery.</p>

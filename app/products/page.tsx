@@ -37,9 +37,12 @@ export default function ProductsPage() {
 
   return (
     <div className="bg-black min-h-screen text-white pb-24">
-      {/* ── Main Banner: Bold Yellow SHOP (Exact as Screenshot) ── */}
-      <section className="pt-12 pb-10 text-center">
-        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-wider text-[#FFE500] uppercase font-sans select-none drop-shadow-[0_4px_24px_rgba(255,229,0,0.25)]">
+      {/* ── Main Banner: Bold Glowing Purple SHOP Title ── */}
+      <section className="pt-12 pb-10 text-center relative overflow-hidden">
+        {/* Purple Ambient Glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-28 bg-[#4D2C9C]/30 rounded-full blur-[80px] pointer-events-none" />
+
+        <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-[#9D6EFF] via-[#C4B5FD] to-[#8B5CF6] uppercase font-sans select-none drop-shadow-[0_4px_30px_rgba(109,62,230,0.5)]">
           SHOP
         </h1>
         <p className="text-neutral-400 text-xs sm:text-sm mt-3 tracking-wide">
@@ -47,7 +50,7 @@ export default function ProductsPage() {
         </p>
       </section>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
         {/* ── Filter & Categories Bar ── */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-8 mb-8 border-b border-neutral-900">
           {/* Category Pills */}
@@ -58,7 +61,7 @@ export default function ProductsPage() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`text-xs font-bold px-4 py-2 rounded-lg transition-all duration-200 ${
                   selectedCategory === cat
-                    ? "bg-[#FFE500] text-black shadow-md shadow-yellow-500/10"
+                    ? "bg-[#4D2C9C] text-white shadow-md shadow-purple-900/30 border border-purple-500/40"
                     : "bg-[#181818] text-neutral-300 hover:text-white hover:bg-neutral-800 border border-neutral-800/80"
                 }`}
               >
@@ -72,7 +75,7 @@ export default function ProductsPage() {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-[#181818] text-neutral-200 border border-neutral-800 text-xs rounded-lg px-3 py-2 outline-none focus:border-[#FFE500]"
+              className="bg-[#181818] text-neutral-200 border border-neutral-800 text-xs rounded-lg px-3 py-2 outline-none focus:border-[#6D3EE6]"
             >
               <option value="default">Featured</option>
               <option value="price-asc">Price: Low to High</option>
@@ -85,14 +88,14 @@ export default function ProductsPage() {
                 type="checkbox"
                 checked={showInStockOnly}
                 onChange={(e) => setShowInStockOnly(e.target.checked)}
-                className="accent-[#FFE500] w-3.5 h-3.5"
+                className="accent-[#6D3EE6] w-3.5 h-3.5"
               />
               <span className="text-neutral-300">In Stock</span>
             </label>
           </div>
         </div>
 
-        {/* ── Products Grid (4 Columns, Black & Yellow Theme) ── */}
+        {/* ── Products Grid ── */}
         {filtered.length === 0 ? (
           <div className="text-center py-24 bg-[#141414] rounded-3xl border border-neutral-900">
             <p className="text-4xl mb-3">🔍</p>
@@ -102,13 +105,13 @@ export default function ProductsPage() {
                 setSelectedCategory("All");
                 setShowInStockOnly(false);
               }}
-              className="mt-4 text-xs font-bold text-black bg-[#FFE500] px-4 py-2 rounded-lg hover:bg-yellow-400 transition"
+              className="mt-4 text-xs font-bold text-white bg-[#4D2C9C] px-4 py-2 rounded-lg hover:bg-[#6D3EE6] transition"
             >
               Reset Filters
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
             {filtered.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}

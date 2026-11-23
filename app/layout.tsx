@@ -17,12 +17,17 @@ export const metadata: Metadata = {
   title: "Detale — Premium Car Care Products",
   description:
     "Professional-grade car care products for enthusiasts and detailing studios. Shop car wash, ceramic coatings, interior care, and more.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${geistSans.variable} h-full antialiased bg-black`}>
-      <body className="min-h-full flex flex-col bg-black text-white font-sans selection:bg-[#FFE500] selection:text-black">
+      <body className="min-h-full flex flex-col bg-black text-white font-sans selection:bg-[#4D2C9C] selection:text-white">
         <AuthProvider>
           <CartProvider>
             <Navbar />
