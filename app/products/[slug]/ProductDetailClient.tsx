@@ -187,7 +187,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         {[
           { icon: Truck, label: "Fast Delivery", sub: "Shiprocket Express" },
           { icon: ShieldCheck, label: "100% Authentic", sub: "Lab Tested" },
-          { icon: RefreshCw, label: "COD & UPI", sub: "Cashfree Verified" },
+          { icon: RefreshCw, label: "Questions?", sub: "Contact Detale" },
         ].map(({ icon: Icon, label, sub }) => (
           <div key={label} className="bg-[#141414] rounded-xl p-3 text-center border border-neutral-800/80">
             <Icon size={16} className="mx-auto text-[#9D6EFF] mb-1" />

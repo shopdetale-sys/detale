@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
-import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck } from "lucide-react";
+import { X, Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 
 export default function CartDrawer() {
   const { isDrawerOpen, closeDrawer, items, removeItem, updateQty, subtotal, shipping, total, itemCount } = useCart();
@@ -150,18 +150,13 @@ export default function CartDrawer() {
                 >
                   View Cart
                 </Link>
-                <Link
-                  href="/checkout"
-                  onClick={closeDrawer}
-                  className="flex-2 py-3 bg-[#4D2C9C] hover:bg-[#6D3EE6] text-white font-extrabold text-xs rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-md shadow-purple-900/30 active:scale-[0.99]"
-                >
-                  Checkout <ArrowRight size={14} />
-                </Link>
               </div>
 
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-neutral-500">
-                <ShieldCheck size={13} className="text-[#9D6EFF]" />
-                <span>100% Secure Cashfree & COD Payments</span>
+              <div className="text-center text-[11px] leading-relaxed text-neutral-500">
+                Static catalog: online checkout is unavailable.{" "}
+                <a href="mailto:support@detale.in" className="text-[#9D6EFF] hover:underline">
+                  Contact support
+                </a>
               </div>
             </div>
           )}

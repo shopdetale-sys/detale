@@ -1,9 +1,16 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { products as fallbackProducts } from "@/lib/products";
 import { getProductBySlugFromFirestore, getProductsFromFirestore } from "@/lib/products-service";
 import Link from "next/link";
 import ProductCard from "@/app/components/ProductCard";
+import ProductArtwork from "@/app/components/ProductArtwork";
 import ProductDetailClient from "./ProductDetailClient";
+import { siteUrl } from "@/lib/site-metadata";
+
+type ProductPageProps = PageProps<"/products/[slug]">;
+
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
   try {
@@ -14,10 +21,95 @@ export async function generateStaticParams() {
   }
 }
 
-export default async function ProductPage(props: PageProps<"/products/[slug]">) {
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlugFromFirestore(slug);
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const description =
+    product.description.length > 160
+      ? `${product.description.slice(0, 157).trimEnd()}...`
+      : product.description;
+  const title = `${product.name} | Detale Car Care`;
+  const canonical = `/products/${product.slug}`;
+  const hasProductImage =
+    product.image &&
+    (product.image.startsWith("http") || product.image.startsWith("/")) &&
+    !product.image.includes("product-");
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      title,
+      description,
+      url: canonical,
+      images: hasProductImage
+        ? [{ url: product.image, alt: product.name }]
+        : [{ url: "/logo.png", alt: "Detale premium car care" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: hasProductImage ? [product.image] : ["/logo.png"],
+    },
+  };
+}
+
+export default async function ProductPage(props: ProductPageProps) {
   const { slug } = await props.params;
   const product = await getProductBySlugFromFirestore(slug);
   if (!product) notFound();
+
+  const productUrl = new URL(`/products/${product.slug}`, siteUrl).toString();
+  const hasProductImage =
+    product.image &&
+    (product.image.startsWith("http") || product.image.startsWith("/")) &&
+    !product.image.includes("product-");
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    sku: product.id,
+    category: product.category,
+    brand: { "@type": "Brand", name: "Detale" },
+    url: productUrl,
+    ...(hasProductImage
+      ? { image: [new URL(product.image, siteUrl).toString()] }
+      : {}),
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "INR",
+      price: product.price,
+      availability: product.inStock
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+    ...(product.reviews > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating,
+            reviewCount: product.reviews,
+            bestRating: 5,
+          },
+        }
+      : {}),
+  };
 
   const { products: allProducts } = await getProductsFromFirestore();
   const related = allProducts.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 4);
@@ -26,6 +118,12 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
 
   return (
     <div className="bg-black min-h-screen text-white py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productSchema).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
         <nav className="text-xs text-neutral-400 mb-8 flex items-center gap-2">
@@ -50,7 +148,7 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
                   className="w-full h-full object-cover relative z-10 transition-transform duration-500 hover:scale-105"
                 />
               ) : (
-                <span className="text-[10rem] select-none relative z-10 drop-shadow-2xl">🚗</span>
+                <ProductArtwork product={product} />
               )}
             </div>
             {product.badge && (

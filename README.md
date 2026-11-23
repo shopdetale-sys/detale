@@ -20,6 +20,16 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## SEO
+
+The app generates page metadata, product structured data, `sitemap.xml`, and `robots.txt`. Set `NEXT_PUBLIC_SITE_URL` to the canonical production origin when deploying (for example, `https://detale.in`) so canonical URLs and crawler files use the correct domain.
+
+## Static hosting deployment
+
+The project builds as a static website for shared hosting such as Hostinger `public_html`. Run `npm ci` and `npm run build`, then upload the **contents** of the generated `out/` folder to `public_html`. Set `NEXT_PUBLIC_SITE_URL` to the canonical production origin before building if it differs from `https://detale.in`.
+
+The static site supports product browsing and the cart in the visitor's browser. Login, admin editing, order tracking, checkout, OTP, and payment APIs require a backend and are not available in this static build. Firebase-backed product data is captured during the build; rebuild and re-upload `out/` to publish catalog changes.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

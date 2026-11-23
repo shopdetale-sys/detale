@@ -6,14 +6,19 @@ import {
   setDoc,
   updateDoc,
   deleteDoc,
-  query,
-  orderBy,
+  deleteField,
   writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { products as fallbackProducts, Product } from "./products";
 
 const PRODUCTS_COLLECTION = "products";
+
+function productFirestoreData(product: Product, id: string) {
+  return Object.fromEntries(
+    Object.entries({ ...product, id }).filter(([, value]) => value !== undefined)
+  );
+}
 
 /**
  * Fetch all products from Cloud Firestore.
@@ -111,15 +116,62 @@ export async function saveProductToFirestore(product: Product): Promise<void> {
   const docId = product.slug || product.id;
   const docRef = doc(db, PRODUCTS_COLLECTION, docId);
 
-  await setDoc(
-    docRef,
-    {
-      ...product,
-      id: docId,
-      updatedAt: Date.now(),
-    },
-    { merge: true }
-  );
+  await setDoc(docRef, {
+    ...productFirestoreData(product, docId),
+    updatedAt: Date.now(),
+  }, { merge: true });
+}
+
+/**
+ * Update a product in Cloud Firestore, moving its document if its slug changes.
+ */
+export async function updateProductInFirestore(
+  originalId: string,
+  product: Product
+): Promise<void> {
+  if (!db) throw new Error("Firestore is not initialized.");
+
+  const nextId = product.slug || product.id;
+  const originalRef = doc(db, PRODUCTS_COLLECTION, originalId);
+  const productData = productFirestoreData(product, nextId);
+  const updatedAt = Date.now();
+
+  if (nextId === originalId) {
+    await updateDoc(originalRef, {
+      ...productData,
+      originalPrice: product.originalPrice ?? deleteField(),
+      badge: product.badge ?? deleteField(),
+      updatedAt,
+    });
+    return;
+  }
+
+  const originalSnapshot = await getDoc(originalRef);
+  if (!originalSnapshot.exists()) {
+    throw new Error("The product no longer exists in Firestore. Reload the product list and try again.");
+  }
+
+  const batch = writeBatch(db);
+  batch.set(doc(db, PRODUCTS_COLLECTION, nextId), {
+    ...productData,
+    createdAt: originalSnapshot.get("createdAt") ?? updatedAt,
+    updatedAt,
+  });
+  batch.delete(originalRef);
+  await batch.commit();
+}
+
+/**
+ * Delete a product from Cloud Firestore.
+ */
+export async function deleteProductFromFirestore(id: string): Promise<void> {
+  if (!db) throw new Error("Firestore is not initialized.");
+  const productRef = doc(db, PRODUCTS_COLLECTION, id);
+  const snapshot = await getDoc(productRef);
+  if (!snapshot.exists()) {
+    throw new Error("The product no longer exists in Firestore. Reload the product list and try again.");
+  }
+  await deleteDoc(productRef);
 }
 
 /**

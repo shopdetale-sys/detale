@@ -1,28 +1,26 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { products as initialProducts, Product } from "@/lib/products";
 import {
   getProductsFromFirestore,
   saveProductToFirestore,
+  updateProductInFirestore,
+  deleteProductFromFirestore,
   updateProductStockInFirestore,
   seedProductsToFirestore,
 } from "@/lib/products-service";
 import { uploadProductImage } from "@/lib/storage";
 import {
-  Package,
   Plus,
   Search,
-  Check,
-  AlertCircle,
   X,
   CloudUpload,
   Loader2,
   Upload,
-  ImageIcon,
-  CheckCircle2,
   Database,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 
 export default function AdminProductsPage() {
@@ -31,6 +29,8 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(null);
   const [seeding, setSeeding] = useState(false);
   const [syncStatus, setSyncStatus] = useState<string | null>(null);
 
@@ -53,13 +53,7 @@ export default function AdminProductsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load products from Cloud Firestore
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
-  const loadProducts = async () => {
-    setLoading(true);
+  const loadProducts = useCallback(async () => {
     try {
       const { products, fromFirestore } = await getProductsFromFirestore();
       setItems(products);
@@ -67,12 +61,40 @@ export default function AdminProductsPage() {
       if (fromFirestore) {
         setSyncStatus("Connected to live Firebase Cloud Firestore");
       }
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
+      setSyncStatus(
+        `Unable to load products: ${err instanceof Error ? err.message : "Unexpected error"}`
+      );
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    getProductsFromFirestore()
+      .then(({ products, fromFirestore }) => {
+        if (!active) return;
+        setItems(products);
+        setIsFirestoreConnected(fromFirestore);
+        if (fromFirestore) {
+          setSyncStatus("Connected to live Firebase Cloud Firestore");
+        }
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        setSyncStatus(
+          `Unable to load products: ${err instanceof Error ? err.message : "Unexpected error"}`
+        );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSeedFirebase = async () => {
     setSeeding(true);
@@ -81,9 +103,12 @@ export default function AdminProductsPage() {
       const count = await seedProductsToFirestore();
       setSyncStatus(`✅ Successfully seeded ${count} car care products to Firebase Cloud Firestore!`);
       setIsFirestoreConnected(true);
+      setLoading(true);
       await loadProducts();
-    } catch (err: any) {
-      setSyncStatus(`❌ Seed error: ${err.message}`);
+    } catch (err: unknown) {
+      setSyncStatus(
+        `Seed error: ${err instanceof Error ? err.message : "Unexpected error"}`
+      );
     } finally {
       setSeeding(false);
     }
@@ -99,8 +124,15 @@ export default function AdminProductsPage() {
     try {
       await updateProductStockInFirestore(id, updatedStock);
       setSyncStatus(`Updated stock status in Firebase for item: ${id}`);
-    } catch (err: any) {
-      console.warn("Could not sync stock status to Firebase:", err);
+    } catch (err: unknown) {
+      setItems((prev) =>
+        prev.map((product) =>
+          product.id === id ? { ...product, inStock: currentStock } : product
+        )
+      );
+      setSyncStatus(
+        `Unable to update stock: ${err instanceof Error ? err.message : "Unexpected error"}`
+      );
     }
   };
 
@@ -112,9 +144,28 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleCreateProduct = async (e: React.FormEvent) => {
+  const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.price) return;
+
+    const slug = newProduct.name
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    if (!slug) {
+      setSyncStatus("Product name must contain at least one letter or number.");
+      return;
+    }
+
+    const conflictingProduct = items.find(
+      (product) =>
+        product.slug === slug && product.id !== editingProduct?.id
+    );
+    if (conflictingProduct) {
+      setSyncStatus(`A product named "${conflictingProduct.name}" already uses this product URL.`);
+      return;
+    }
 
     setIsSubmitting(true);
     let finalImageUrl = newProduct.image || "/products/product-1.jpg";
@@ -129,8 +180,12 @@ export default function AdminProductsPage() {
       }
 
       // 2. Prepare product object
-      const slug = newProduct.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
-      const created: Product = {
+      const savedProduct: Product = {
+        ...(editingProduct ?? {
+          rating: 5.0,
+          reviews: 0,
+          features: ["Professional grade", "Long lasting shine", "Safe on coatings"],
+        }),
         id: slug,
         name: newProduct.name,
         slug,
@@ -138,24 +193,30 @@ export default function AdminProductsPage() {
         originalPrice: newProduct.originalPrice ? Number(newProduct.originalPrice) : undefined,
         category: newProduct.category,
         badge: newProduct.badge || undefined,
-        description: newProduct.description || "Premium automotive care formulation.",
-        features: ["Professional grade", "Long lasting shine", "Safe on coatings"],
-        rating: 5.0,
-        reviews: 0,
+        description: newProduct.description || (editingProduct?.description ?? "Premium automotive care formulation."),
         image: finalImageUrl,
         inStock: newProduct.inStock,
       };
 
-      // 3. Save to Cloud Firestore
-      await saveProductToFirestore(created);
+      if (editingProduct) {
+        await updateProductInFirestore(editingProduct.id, savedProduct);
+      } else {
+        await saveProductToFirestore(savedProduct);
+      }
 
-      // 4. Update UI
-      setItems([created, ...items.filter((p) => p.slug !== slug)]);
+      setItems((currentItems) =>
+        editingProduct
+          ? currentItems.map((product) =>
+              product.id === editingProduct.id ? savedProduct : product
+            )
+          : [savedProduct, ...currentItems.filter((product) => product.slug !== slug)]
+      );
       setShowAddModal(false);
+      setEditingProduct(null);
       setImageFile(null);
       setImagePreview(null);
       setUploadProgress(null);
-      setSyncStatus(`✅ Product saved and image uploaded to Firebase Storage!`);
+      setSyncStatus(editingProduct ? "Product updated successfully." : "Product added successfully.");
       setNewProduct({
         name: "",
         category: "Exterior Wash",
@@ -166,10 +227,75 @@ export default function AdminProductsPage() {
         inStock: true,
         image: "",
       });
-    } catch (err: any) {
-      alert(`Error saving product: ${err.message}`);
+    } catch (err) {
+      setSyncStatus(
+        `Unable to ${editingProduct ? "update" : "save"} product: ${
+          err instanceof Error ? err.message : "Unexpected error"
+        }`
+      );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const openEditModal = (product: Product) => {
+    setEditingProduct(product);
+    setNewProduct({
+      name: product.name,
+      category: product.category,
+      price: String(product.price),
+      originalPrice: product.originalPrice ? String(product.originalPrice) : "",
+      badge: product.badge ?? "",
+      description: product.description,
+      inStock: product.inStock,
+      image: product.image,
+    });
+    setImageFile(null);
+    setImagePreview(product.image);
+    setShowAddModal(true);
+  };
+
+  const openAddModal = () => {
+    setEditingProduct(null);
+    setNewProduct({
+      name: "",
+      category: "Exterior Wash",
+      price: "",
+      originalPrice: "",
+      badge: "",
+      description: "",
+      inStock: true,
+      image: "",
+    });
+    setImageFile(null);
+    setImagePreview(null);
+    setShowAddModal(true);
+  };
+
+  const closeProductModal = () => {
+    setShowAddModal(false);
+    setEditingProduct(null);
+    setImageFile(null);
+    setImagePreview(null);
+    setUploadProgress(null);
+  };
+
+  const handleDeleteProduct = async (product: Product) => {
+    if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return;
+
+    setDeletingProductId(product.id);
+    try {
+      await deleteProductFromFirestore(product.id);
+      setItems((currentItems) => currentItems.filter((item) => item.id !== product.id));
+      setSyncStatus(`Deleted "${product.name}".`);
+    } catch (err) {
+      setSyncStatus(
+        `Unable to delete product: ${
+          err instanceof Error ? err.message : "Unexpected error"
+        }`
+      );
+    } finally {
+      setDeletingProductId(null);
     }
   };
 
@@ -219,7 +345,7 @@ export default function AdminProductsPage() {
             )}
           </button>
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={openAddModal}
             className="inline-flex items-center gap-1.5 text-xs font-semibold bg-purple-700 hover:bg-purple-800 text-white px-4 py-2.5 rounded-xl transition shadow-xs"
           >
             <Plus size={16} /> Add Product with Storage Image
@@ -259,13 +385,28 @@ export default function AdminProductsPage() {
                 <th className="py-3.5">Price</th>
                 <th className="py-3.5">Rating</th>
                 <th className="py-3.5">Stock Status</th>
-                <th className="py-3.5 text-right pr-6">Firestore Action</th>
+                <th className="py-3.5 text-right pr-6">Product Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filtered.map((product) => {
-                const isFirebaseStorage = product.image?.includes("firebasestorage.app") || product.image?.includes("googleapis.com");
-                return (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="py-10 text-center text-gray-500">
+                    Loading products...
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-10 text-center text-gray-500">
+                    No products found.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((product) => {
+                  const isFirebaseStorage =
+                    product.image?.includes("firebasestorage.app") ||
+                    product.image?.includes("googleapis.com");
+                  return (
                   <tr key={product.id} className="hover:bg-gray-50/80 transition">
                     <td className="py-4 pl-6">
                       <div className="flex items-center gap-3">
@@ -319,20 +460,46 @@ export default function AdminProductsPage() {
                       </span>
                     </td>
                     <td className="py-4 text-right pr-6">
-                      <button
-                        onClick={() => toggleStock(product.id, product.inStock)}
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition ${
-                          product.inStock
-                            ? "border-amber-300 text-amber-700 hover:bg-amber-50"
-                            : "border-green-300 text-green-700 hover:bg-green-50"
-                        }`}
-                      >
-                        {product.inStock ? "Set Out of Stock" : "Restock Item"}
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => toggleStock(product.id, product.inStock)}
+                          className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition ${
+                            product.inStock
+                              ? "border-amber-300 text-amber-700 hover:bg-amber-50"
+                              : "border-green-300 text-green-700 hover:bg-green-50"
+                          }`}
+                        >
+                          {product.inStock ? "Set Out of Stock" : "Restock Item"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openEditModal(product)}
+                          aria-label={`Edit ${product.name}`}
+                          title="Edit product"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-purple-50 hover:text-purple-700 transition"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProduct(product)}
+                          disabled={deletingProductId === product.id}
+                          aria-label={`Delete ${product.name}`}
+                          title="Delete product"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition disabled:opacity-50"
+                        >
+                          {deletingProductId === product.id ? (
+                            <Loader2 size={14} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
+                        </button>
+                      </div>
                     </td>
                   </tr>
-                );
-              })}
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -344,18 +511,20 @@ export default function AdminProductsPage() {
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-gray-100">
               <div>
-                <h2 className="text-base font-bold text-gray-900">Add Product to Firestore</h2>
+                <h2 className="text-base font-bold text-gray-900">
+                  {editingProduct ? "Edit Product" : "Add Product to Firestore"}
+                </h2>
                 <p className="text-[11px] text-gray-500">Image uploads directly to Firebase Storage</p>
               </div>
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={closeProductModal}
                 className="w-7 h-7 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <form onSubmit={handleCreateProduct} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveProduct} className="space-y-4 text-xs">
               {/* Product Image Upload Box */}
               <div>
                 <label className="block font-semibold text-gray-700 mb-1.5">
@@ -432,6 +601,16 @@ export default function AdminProductsPage() {
                     onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
                     className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
                   >
+                    {![
+                      "Exterior Wash",
+                      "Paint Protection",
+                      "Interior Care",
+                      "Glass Care",
+                      "Tire & Wheel Care",
+                      "Accessories",
+                    ].includes(newProduct.category) && (
+                      <option value={newProduct.category}>{newProduct.category}</option>
+                    )}
                     <option value="Exterior Wash">Exterior Wash</option>
                     <option value="Paint Protection">Paint Protection</option>
                     <option value="Interior Care">Interior Care</option>
@@ -458,6 +637,8 @@ export default function AdminProductsPage() {
                   <input
                     type="number"
                     required
+                    min="0"
+                    step="0.01"
                     placeholder="e.g. 799"
                     value={newProduct.price}
                     onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
@@ -468,12 +649,31 @@ export default function AdminProductsPage() {
                   <label className="block font-semibold text-gray-700 mb-1">Original Price (₹)</label>
                   <input
                     type="number"
+                    min="0"
+                    step="0.01"
                     placeholder="e.g. 999"
                     value={newProduct.originalPrice}
                     onChange={(e) => setNewProduct({ ...newProduct, originalPrice: e.target.value })}
                     className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs outline-none"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-gray-700 mb-1">Stock Status</label>
+                <select
+                  value={newProduct.inStock ? "in-stock" : "out-of-stock"}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      inStock: e.target.value === "in-stock",
+                    })
+                  }
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs bg-white outline-none"
+                >
+                  <option value="in-stock">In stock</option>
+                  <option value="out-of-stock">Out of stock</option>
+                </select>
               </div>
 
               <div>
@@ -490,7 +690,7 @@ export default function AdminProductsPage() {
               <div className="flex justify-end gap-2.5 pt-2">
                 <button
                   type="button"
-                  onClick={() => setShowAddModal(false)}
+                  onClick={closeProductModal}
                   className="px-4 py-2 border border-gray-200 rounded-xl font-semibold hover:bg-gray-50 transition"
                 >
                   Cancel
@@ -505,7 +705,7 @@ export default function AdminProductsPage() {
                       <Loader2 size={13} className="animate-spin" /> Saving...
                     </>
                   ) : (
-                    "Save to Firestore"
+                    editingProduct ? "Update Product" : "Save to Firestore"
                   )}
                 </button>
               </div>

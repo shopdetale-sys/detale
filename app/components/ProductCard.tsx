@@ -5,6 +5,7 @@ import type { Product } from "@/lib/products";
 import { useCart } from "@/lib/cart-context";
 import { useState } from "react";
 import { Check, Plus } from "lucide-react";
+import ProductArtwork from "@/app/components/ProductArtwork";
 
 export default function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
@@ -47,14 +48,7 @@ export default function ProductCard({ product }: { product: Product }) {
               className="w-full h-full object-cover"
             />
           ) : (
-            <div className="relative flex flex-col items-center justify-center">
-              {/* Purple Pedestal Glow Effect */}
-              <div className="w-32 h-10 rounded-full bg-[#4D2C9C]/25 blur-xl absolute bottom-2" />
-              <div className="text-6xl sm:text-7xl select-none filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.8)]">
-                🧴
-              </div>
-              <div className="w-24 h-3 bg-black/80 rounded-full blur-xs mt-2" />
-            </div>
+            <ProductArtwork product={product} />
           )}
         </div>
 

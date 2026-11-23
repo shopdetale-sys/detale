@@ -54,18 +54,19 @@ export default function Footer() {
               Quick Links
             </h4>
             <ul className="space-y-2 text-xs">
-              {["Home", "Products", "Track Orders", "About Us", "FAQ"].map(
-                (item) => (
-                  <li key={item}>
-                    <Link
-                      href="/products"
-                      className="text-neutral-400 hover:text-[#9D6EFF] transition-colors"
-                    >
-                      {item}
-                    </Link>
-                  </li>
-                ),
-              )}
+              {[
+                { label: "Home", href: "/" },
+                { label: "Products", href: "/products" },
+              ].map(({ label, href }) => (
+                <li key={label}>
+                  <Link
+                    href={href}
+                    className="text-neutral-400 hover:text-[#9D6EFF] transition-colors"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

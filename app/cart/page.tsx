@@ -157,19 +157,24 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <Link
-                href="/checkout"
-                className="w-full bg-[#4D2C9C] hover:bg-[#6D3EE6] text-white font-extrabold py-3.5 rounded-lg text-center transition flex items-center justify-center gap-2 text-xs uppercase tracking-wider shadow-lg shadow-purple-900/40 active:scale-[0.98]"
-              >
-                Proceed to Checkout <ArrowRight size={16} />
-              </Link>
+              <p className="rounded-xl border border-neutral-800 bg-[#181818] p-4 text-xs leading-relaxed text-neutral-400">
+                Online checkout is unavailable on this static catalog. To place
+                an order, contact{" "}
+                <a
+                  href="mailto:support@detale.in"
+                  className="font-semibold text-[#9D6EFF] hover:underline"
+                >
+                  support@detale.in
+                </a>
+                .
+              </p>
 
               <div className="bg-[#181818] border border-neutral-800 rounded-xl p-4 text-[11px] text-neutral-400 space-y-2">
                 <div className="flex items-center gap-2 text-white font-semibold">
                   <ShieldCheck size={16} className="text-[#9D6EFF]" />
-                  <span>Secure Payments by Cashfree</span>
+                  <span>Cart saved in this browser</span>
                 </div>
-                <p>Supports UPI (GPay, PhonePe, Paytm), Credit & Debit Cards, NetBanking, and Cash on Delivery.</p>
+                <p>Your cart stays on this device and is not submitted as an order.</p>
               </div>
             </div>
           </div>

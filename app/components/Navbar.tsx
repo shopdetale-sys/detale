@@ -1,137 +1,75 @@
 "use client";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, Menu, X, User, LogOut, LayoutDashboard, Shield, ShieldCheck } from "lucide-react";
+import { Menu, Moon, ShoppingBag, Sun, X } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
-import { useAuth } from "@/lib/auth-context";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [userDropdown, setUserDropdown] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const { itemCount, openDrawer } = useCart();
-  const { profile, isAdmin, logout } = useAuth();
+
+  useEffect(() => {
+    setTheme(
+      document.documentElement.dataset.theme === "light" ? "light" : "dark"
+    );
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === "dark" ? "light" : "dark";
+    setTheme(nextTheme);
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem("detale-theme", nextTheme);
+  };
 
   return (
     <header className="sticky top-0 z-40 bg-black">
-      {/* ── Top Trust Banner (Detale Purple #4D2C9C) ── */}
-      <div className="bg-[#4D2C9C] text-white font-bold text-xs py-2 px-4 text-center flex items-center justify-center gap-2 shadow-sm tracking-wide">
-        <ShieldCheck size={14} className="text-purple-200" />
-        <span>Trusted by 20,00,000+ customers across India</span>
-      </div>
-
-      {/* ── Main Navigation Bar ── */}
       <div className="border-b border-neutral-900 bg-black/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
             <Link href="/" className="flex items-center flex-shrink-0 group">
-              <div className="transition-all duration-300 group-hover:scale-105 filter drop-shadow-[0_0_12px_rgba(109,62,230,0.5)]">
-                <Image
-                  src="/logo.png"
-                  alt="Detale"
-                  width={120}
-                  height={40}
-                  className="h-9 w-auto"
-                  priority
-                />
-              </div>
+              <Image
+                src="/logo.png"
+                alt="Detale"
+                width={120}
+                height={40}
+                className="h-9 w-auto transition-transform duration-300 group-hover:scale-105"
+                priority
+              />
             </Link>
 
-            {/* Desktop Navigation Links */}
             <nav className="hidden md:flex items-center gap-8">
+              <Link
+                href="/"
+                className="text-neutral-300 hover:text-[#9D6EFF] text-sm font-medium transition-colors"
+              >
+                Home
+              </Link>
               <Link
                 href="/products"
                 className="text-neutral-300 hover:text-[#9D6EFF] text-sm font-medium transition-colors"
               >
                 Products
               </Link>
-              <Link
-                href="/orders"
-                className="text-neutral-300 hover:text-[#9D6EFF] text-sm font-medium transition-colors"
-              >
-                Track Orders
-              </Link>
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold bg-[#4D2C9C] text-white px-3.5 py-1.5 rounded-full hover:bg-[#6D3EE6] transition shadow-xs"
-                >
-                  <LayoutDashboard size={13} />
-                  Admin Panel
-                </Link>
-              )}
             </nav>
 
-            {/* Right Actions */}
             <div className="flex items-center gap-3">
-              {/* User Account / Profile */}
-              <div className="relative">
-                {profile ? (
-                  <div>
-                    <button
-                      onClick={() => setUserDropdown(!userDropdown)}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-neutral-900 text-xs font-medium text-neutral-200 border border-neutral-800 transition"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-[#4D2C9C] text-white flex items-center justify-center font-bold text-xs">
-                        {profile.phone.slice(-2)}
-                      </div>
-                      <span className="hidden sm:inline">
-                        {isAdmin ? "Admin" : `+91 ${profile.phone.slice(-4)}`}
-                      </span>
-                    </button>
-
-                    {userDropdown && (
-                      <div className="absolute right-0 mt-2 w-48 bg-[#161616] rounded-2xl shadow-2xl border border-neutral-800 py-2 z-50">
-                        <div className="px-4 py-2 border-b border-neutral-800">
-                          <p className="text-xs font-bold text-white">
-                            {profile.name || "My Account"}
-                          </p>
-                          <p className="text-[11px] text-neutral-400">+91 {profile.phone}</p>
-                        </div>
-                        {isAdmin && (
-                          <Link
-                            href="/admin"
-                            onClick={() => setUserDropdown(false)}
-                            className="flex items-center gap-2 px-4 py-2 text-xs text-[#9D6EFF] font-semibold hover:bg-neutral-900"
-                          >
-                            <Shield size={14} /> Admin Dashboard
-                          </Link>
-                        )}
-                        <Link
-                          href="/orders"
-                          onClick={() => setUserDropdown(false)}
-                          className="flex items-center gap-2 px-4 py-2 text-xs text-neutral-300 hover:bg-neutral-900"
-                        >
-                          My Orders
-                        </Link>
-                        <button
-                          onClick={() => {
-                            logout();
-                            setUserDropdown(false);
-                          }}
-                          className="w-full text-left flex items-center gap-2 px-4 py-2 text-xs text-red-400 hover:bg-neutral-900 transition"
-                        >
-                          <LogOut size={14} /> Logout
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="flex items-center justify-center w-10 h-10 rounded-xl text-neutral-300 hover:text-[#9D6EFF] hover:bg-neutral-900 transition"
-                    title="Sign In"
-                  >
-                    <User size={20} />
-                  </Link>
-                )}
-              </div>
-
-              {/* Shopping Bag / Cart Button */}
               <button
+                type="button"
+                onClick={toggleTheme}
+                aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+                title={`Switch to ${theme === "dark" ? "light" : "dark"} theme`}
+                className="flex items-center justify-center w-10 h-10 rounded-xl border border-neutral-800 hover:bg-neutral-900 text-neutral-300 transition"
+              >
+                {theme === "dark" ? <Sun size={19} /> : <Moon size={19} />}
+              </button>
+
+              <button
+                type="button"
                 onClick={openDrawer}
-                aria-label="Open Cart"
+                aria-label={`Open cart${itemCount > 0 ? ` (${itemCount} items)` : ""}`}
                 className="relative flex items-center justify-center w-10 h-10 rounded-xl hover:bg-neutral-900 text-neutral-200 hover:text-[#9D6EFF] transition"
               >
                 <ShoppingBag size={21} />
@@ -142,8 +80,9 @@ export default function Navbar() {
                 )}
               </button>
 
-              {/* Mobile menu toggle */}
               <button
+                type="button"
+                aria-label={menuOpen ? "Close menu" : "Open menu"}
                 className="md:hidden flex items-center justify-center w-10 h-10 rounded-xl hover:bg-neutral-900 text-neutral-300"
                 onClick={() => setMenuOpen(!menuOpen)}
               >
@@ -153,9 +92,15 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
         {menuOpen && (
-          <div className="md:hidden bg-[#0d0d0d] border-t border-neutral-900 px-5 py-5 flex flex-col gap-3">
+          <nav className="md:hidden bg-[#0d0d0d] border-t border-neutral-900 px-5 py-5 flex flex-col gap-3">
+            <Link
+              href="/"
+              className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#9D6EFF]"
+              onClick={() => setMenuOpen(false)}
+            >
+              Home
+            </Link>
             <Link
               href="/products"
               className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#9D6EFF]"
@@ -164,41 +109,13 @@ export default function Navbar() {
               Products
             </Link>
             <Link
-              href="/orders"
+              href="/cart"
               className="text-neutral-200 text-sm font-medium py-1.5 hover:text-[#9D6EFF]"
               onClick={() => setMenuOpen(false)}
             >
-              My Orders
+              Cart{itemCount > 0 ? ` (${itemCount})` : ""}
             </Link>
-            {isAdmin && (
-              <Link
-                href="/admin"
-                className="text-[#9D6EFF] text-sm font-bold py-1.5"
-                onClick={() => setMenuOpen(false)}
-              >
-                Admin Dashboard
-              </Link>
-            )}
-            {!profile ? (
-              <Link
-                href="/login"
-                className="text-[#9D6EFF] font-bold text-sm py-1.5"
-                onClick={() => setMenuOpen(false)}
-              >
-                Sign In with OTP
-              </Link>
-            ) : (
-              <button
-                onClick={() => {
-                  logout();
-                  setMenuOpen(false);
-                }}
-                className="text-left text-red-400 text-sm font-medium py-1.5"
-              >
-                Logout
-              </button>
-            )}
-          </div>
+          </nav>
         )}
       </div>
     </header>

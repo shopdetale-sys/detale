@@ -1,17 +1,54 @@
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Star, ShieldCheck, Truck, RefreshCw, Sparkles, CheckCircle2 } from "lucide-react";
+import {
+  ArrowRight,
+  Star,
+  ShieldCheck,
+  Truck,
+  RefreshCw,
+} from "lucide-react";
 import { getProductsFromFirestore } from "@/lib/products-service";
 import ProductCard from "@/app/components/ProductCard";
+import type { Metadata } from "next";
+import { siteUrl } from "@/lib/site-metadata";
 
-export const revalidate = 60; // revalidate every 60 seconds
+export const metadata: Metadata = {
+  title: "Car Detailing Products & Care | Detale",
+  description:
+    "Shop premium car detailing products in India, from pH-balanced car wash shampoo and ceramic spray coating to interior, glass, and paint care.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 export default async function HomePage() {
   const { products: allProducts } = await getProductsFromFirestore();
-  const featured = allProducts.filter((p) => p.badge);
 
   return (
     <div className="bg-black text-white min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                name: "Detale",
+                url: siteUrl.toString(),
+                logo: new URL("/logo.png", siteUrl).toString(),
+                email: "support@detale.in",
+              },
+              {
+                "@type": "WebSite",
+                name: "Detale",
+                url: siteUrl.toString(),
+                description:
+                  "Professional car care and detailing products for enthusiasts and detailing studios.",
+              },
+            ],
+          }).replace(/</g, "\\u003c"),
+        }}
+      />
       {/* ── Featured Products Grid (Shop Look) ── */}
       <section className="py-10 sm:py-20 bg-black">
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
@@ -45,18 +82,41 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { icon: Truck, title: "Express Dispatch", desc: "Shiprocket logistics across 28,000+ pin codes" },
-              { icon: ShieldCheck, title: "100% Authentic", desc: "Formulated & tested for Indian road conditions" },
-              { icon: RefreshCw, title: "Cash on Delivery", desc: "Pay safely with COD or Instant UPI via Cashfree" },
-              { icon: Star, title: "Showroom Finish", desc: "Hydrophobic SiO2 ceramic water beading protection" },
+              {
+                icon: Truck,
+                title: "Express Dispatch",
+                desc: "Shiprocket logistics across 28,000+ pin codes",
+              },
+              {
+                icon: ShieldCheck,
+                title: "100% Authentic",
+                desc: "Formulated & tested for Indian road conditions",
+              },
+              {
+                icon: RefreshCw,
+                title: "Cash on Delivery",
+                desc: "Pay safely with COD or Instant UPI via Cashfree",
+              },
+              {
+                icon: Star,
+                title: "Showroom Finish",
+                desc: "Hydrophobic SiO2 ceramic water beading protection",
+              },
             ].map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="p-5 rounded-2xl bg-[#141414] border border-neutral-800/60 flex items-start gap-3.5">
+              <div
+                key={title}
+                className="p-5 rounded-2xl bg-[#141414] border border-neutral-800/60 flex items-start gap-3.5"
+              >
                 <div className="w-10 h-10 rounded-xl bg-[#4D2C9C] text-white flex items-center justify-center flex-shrink-0 font-bold">
-                  <Icon size={20} />
+                  <Icon size={20} className="text-white theme-icon" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white mb-0.5">{title}</h3>
-                  <p className="text-xs text-neutral-400 leading-relaxed">{desc}</p>
+                  <h3 className="text-sm font-bold text-white mb-0.5">
+                    {title}
+                  </h3>
+                  <p className="text-xs text-neutral-400 leading-relaxed">
+                    {desc}
+                  </p>
                 </div>
               </div>
             ))}
